@@ -11,7 +11,7 @@ class SunDatabase(object):
     def rebuild(self):
         self.conn.execute("drop table if exists solar;")
         self.conn.execute("""create table if not exists solar 
-                ( timestamp , sky STRING, azimuth FLOAT,  elevation FLOAT);""")
+                ( timestamp INTEGER, sky STRING, azimuth FLOAT,  elevation FLOAT);""")
     def insert(self,timestamp,sky,azimuth,elevation):
         self.conn.execute("insert into solar values(?,?,?,?);",
             (timestamp,sky,azimuth,elevation)
@@ -34,10 +34,17 @@ class SunDatabase(object):
         for i in cur.fetchall():
             print(
                 datetime.datetime.fromtimestamp(i[0]),
-                i[1], i[2]
+                i[1], i[2])
+
+def dump_to_file():
+    db = SunDatabase()
+    cur = db.conn.execute("select * from solar order by timestamp;")
+    for i in range(0,10):
+
+        print (cur.fetchone())
 
 
-            )
+
 monthTab = {
     "Jan":1,    "Feb":2,    "Mar":3,
     "Apr":4,    "May":5,    "Jun":6,
@@ -76,8 +83,6 @@ def get_generator_from_horizons_output():
             if processing == True:
                 yield line
 
-
-
 def make_a_new_database():
     home = os.getenv("USERPROFILE")
     mydb = SunDatabase()
@@ -97,10 +102,6 @@ def make_a_new_database():
         d = parseTime(day,time).timestamp()
         mydb.insert(d, sky,azimuth,elevation)
     mydb.commit()
-    
                 
 if __name__ == "__main__":
-    make_a_new_database()
-    # gen = get_generator_from_horizons_output()
-    # i = next(gen)
-    # print(i)
+    dump_to_file()
