@@ -60,9 +60,6 @@ def parseTime(day,time):
     
 def get_generator_from_horizons_output():
     home = os.getenv("USERPROFILE")
-    mydb = SunDatabase()
-    mydb.rebuild()
-        
     if home == None:
         home=os.getenv("HOME")
     fn = os.path.join(home, "OneDrive", "solarcalc", "horizons_results (4).txt")
@@ -76,9 +73,7 @@ def get_generator_from_horizons_output():
             processing = False
             print("stop processing")
         else:
-            sky = ""
             if processing == True:
-                
                 yield line
 
 
@@ -88,34 +83,24 @@ def make_a_new_database():
     mydb = SunDatabase()
     mydb.rebuild()
         
-    if home == None:
-        home=os.getenv("HOME")
-    fn = os.path.join(home, "OneDrive", "solarcalc", "horizons_results (4).txt")
-    file = open(fn)
-    processing = False
-    for line in file:
-        if line.startswith("$$SOE"):
-            processing = True
-            print("start processing")
-        elif line.startswith("$$EOE"):
-            processing = False
-            print("stop processing")
-        else:
-            sky = ""
-            if processing == True:
-                parts = line.split()
-                day = parts.pop(0)
-                time = parts.pop(0)
-                if len(parts) == 3:
-                    sky  = parts.pop(0)
-                azimuth = parts.pop(0)
-                elevation = parts.pop(0)
-                d = parseTime(day,time).timestamp()
-                mydb.insert(d, sky,azimuth,elevation)
+    myfile = get_generator_from_horizons_output()
+    for line in myfile:
+        sky = ""
+        
+        parts = line.split()
+        day = parts.pop(0)
+        time = parts.pop(0)
+        if len(parts) == 3:
+            sky  = parts.pop(0)
+        azimuth = parts.pop(0)
+        elevation = parts.pop(0)
+        d = parseTime(day,time).timestamp()
+        mydb.insert(d, sky,azimuth,elevation)
     mydb.commit()
     
                 
 if __name__ == "__main__":
-    gen = get_generator_from_horizons_output()
-    i = next(gen)
-    print(i)
+    make_a_new_database()
+    # gen = get_generator_from_horizons_output()
+    # i = next(gen)
+    # print(i)
