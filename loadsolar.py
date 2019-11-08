@@ -37,11 +37,14 @@ class SunDatabase(object):
                 i[1], i[2])
 
 def dump_to_file():
+    
     db = SunDatabase()
     cur = db.conn.execute("select * from solar order by timestamp;")
-    for i in range(0,10):
+    for i in cur.fetchall():
+        print('{}\t{}\t{}\t{}'.format(i[0],i[1],i[2],i[3]))
 
-        print (cur.fetchone())
+
+        
 
 
 
