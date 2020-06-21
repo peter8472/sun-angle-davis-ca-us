@@ -3,7 +3,12 @@ import sqlite3
 import glob
 import random
 import datetime
-
+'https://www.weather.gov/fsd/twilight'
+'''
+civil twilight: ends when geometric center of sun is 6 degrees below horizon
+nautical twilight: ends when geometric center is 12 degrees below horizon
+astronomical twilight: ends when geometric center is 18 degrees below horizon
+'''
 
 class SunDatabase(object):
     def __init__(self):
@@ -20,12 +25,20 @@ class SunDatabase(object):
     def commit(self):
         self.conn.commit()
         
-    def getnow(self):
+    def getnow(self,ago_time=600,to_time=600):
+        'return a range of records relative to the current time'
         now = datetime.datetime.today().timestamp()
         cur = self.conn.execute("""select * from solar where timestamp 
-            between {} and {}""".format(now - 600, now + 600))
+            between {} and {}""".format(now - ago_time, now + to_time))
 
-        print(cur.fetchall())
+        return(cur.fetchall())
+    def twilight(self,ago_time=600,to_time=600):
+        'return a range of records relative to the current time'
+        now = datetime.datetime.today().timestamp()
+        cur = self.conn.execute("""select * from solar where elevation between -18 and 5 and timestamp 
+            between {} and {}""".format(now - ago_time, now + to_time))
+
+        return(cur.fetchall())
     def sunset(self):
         now = datetime.datetime.today().timestamp()
         cur = self.conn.execute("""select * from solar where timestamp 
@@ -37,7 +50,7 @@ class SunDatabase(object):
                 i[1], i[2])
 
 def dump_to_file():
-    
+    'prints a tsv for all records'
     db = SunDatabase()
     cur = db.conn.execute("select * from solar order by timestamp;")
     for i in cur.fetchall():
@@ -106,5 +119,22 @@ def make_a_new_database():
         mydb.insert(d, sky,azimuth,elevation)
     mydb.commit()
                 
+
+# ( timestamp INTEGER, sky STRING, azimuth FLOAT,  elevation FLOAT);
+def interpolate(val1, val2, tstamp):
+    'interpolate between two timestamps.'
+    'calculate the offsets'
+    off1 = tstamp - val1['timestamp']
+    off2 = val2['timestamp'] - tstamp
+    percent = off1 / (val2['timestamp'] - val2['timestamp'])
+
 if __name__ == "__main__":
-    dump_to_file()
+    # dump_to_file()
+    db = SunDatabase()
+    cur = db.conn.execute("""select min(elevation),max(elevation) from solar where sky like "A%" 
+        limit 150""")
+
+    for i in cur.fetchall():
+        print(i)
+
+
