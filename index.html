@@ -10,19 +10,41 @@
       body {
         border: 1px solid black;
       }
+
+      
+      data-tab {
+        display:table;
+      }
+      sun-element {
+        display:table-row;
+        border: 10px solid red;
+      }
+      td {
+        border: 10px solid black;
+      }
+
+    
     </style>
 
     <!-- Inline scripts are forbidden in Firefox OS apps (CSP restrictions),
          so we use a script file. -->
     <script src="app.js" defer></script>
     <script src="angle.js"></script>
+        <script src="elements.js"></script>
 
   </head>
 
   <body>
     <!-- This code is in the public domain. Enjoy! -->
     <h1>under constructionm</h1>
-    <p>make pareser
+    
+    <data-tab id=output></data-tab>
+    <button id=now name=now value="this is a button">near now</button>
+    <input type="datetime-local" id=chooser />
+    <button id=deleteall >delete the database</button>
+    <button id=loadall >load the database</button>
+
+        
   </body>
 
 </html>

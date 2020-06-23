@@ -1,23 +1,85 @@
+// This stuff looks so bad because it is from my 
+// mapstops React project
+var mydb;
+// var request = indexedDB.open("sunangles");
 
+const SUNSTORE = "sunangles"
+const DBNAME = "blah1";
+const NOWBUTTON = "now";
+const DELETEBUTTON = "deleteall";
+const LOADBUTTON = "loadall";
+// request.onsuccess = function(event) {
+//     console.log(event.target.result);
+// }
+// request.onerror = function(event) {
+//     console.log("bad fail to open db");
+// }
+function mylog(message) {
+    console.log(message)
+}
+
+// ==================paste
+function startUp() {
+    var mydbreq = window.indexedDB.open(DBNAME, 1)
+    mydbreq.onerror = function(event) {
+        mylog("error opening databsae")
+    }
+    mydbreq.onsuccess = function(event) {
+        mylog("success opening dartabase");
+        mydb = mydbreq.result;
+
+        //console.log(mydb);
+    }
+    mydbreq.onupgradeneeded = function(event) {
+        mydb = event.target.result;
+        mydb.onerror = function(event) {
+            mylog("error loading database ")
+
+        }
+        mydb.onsuccess = function(event) {
+            mylog("done upgrading database")
+        }
+        switch (event.oldVersion) {
+        case 0:
+            objectStore = mydb.createObjectStore(SUNSTORE, {
+                autoIncrement: true
+            });
+
+            objectStore.createIndex("date", "date", {
+                unique: false
+            });
+            objectStore.createIndex("sky", "sky", {
+                unique: false
+            });
+            objectStore.createIndex("azimuth", "azimuth", {
+                unique: false
+            });
+            objectStore.createIndex("elevation", "elevation", {
+                unique: false
+            });
+
+        }
+    }
+
+}
+
+// ===================
 function addPoints(pointList) {
     if (mydb) {
-        var transaction = mydb.transaction(["sunangles"], "readwrite");
-        transaction.oncomplete = function(event) {//console.log("all done");
+        var transaction = mydb.transaction([SUNSTORE], "readwrite");
+        transaction.oncomplete = function(event) {
+            //console.log("all done");
         }
         ;
         transaction.onerror = function(event) {
             alert("error" + event);
         }
         ;
-        var ostore = transaction.objectStore("addys");
+        var ostore = transaction.objectStore(SUNSTORE);
         for (let point of pointList) {
-            point['X'] = Number(point['X'])
-            point['Y'] = Number(point['Y'])
             var req = ostore.add(point);
         }
-
-        req.onsuccess = function(event) {
-            console.log("add object success");
+        req.onsuccess = function(event) {// console.log("add object success");
         }
         ;
         req.onerror = function(event) {
@@ -31,7 +93,6 @@ function getData(url) {
     /* global fetch */
     fetch(url).then((response)=>{
 
-        
         return response.text()
     }
     ).then((buffer)=>{
@@ -57,37 +118,86 @@ function getData(url) {
             var tmpray = stringRay.splice(0, SLICESIZE);
             if (tmpray.length > 0)
                 addPoints(tmpray.map(function(line) {
-                    try {
-                        parts = line.split(/[\t ]+/);
-        day = parts.shift()
-        time = parts.shift()
-        if (parts.length == 3) {
-            sky  = parts.shift()
-        }
-        azimuth = parts.shift()
-        elevation = parts.shift()
-        d = parseTime(day,time).timestamp()
-        mydb.insert(d, sky,azimuth,elevation)
-    mydb.commit()
-                    return JSON.parse(instr);
-                    } catch (error) {
-                        console.log(error);
-                        console.log(instr);
+                    blah = new Object();
+                    blah.sky = ""
+                    parts = line.split(/[\t ]+/);
+
+                    time = parts.shift()
+                    if (parts.length == 3) {
+                        blah.sky = parts.shift()
                     }
-
-
-
-
-
-                                    }));
+                    blah.azimuth = parts.shift()
+                    blah.elevation = parts.shift()
+                    blah.date = new Date(time * 1000);
+                    return blah;
+                }));
         }
-
-        this.setState({
-            isGetting: "parse is done",
-            data: addrlist
-
-        });
+        console.log("finished loading")
     }
     );
 }
-getData("sun.txt")
+
+startUp();
+var fmthours = function(when) {
+    hours = when.getHours();
+    minutes = when.getMinutes();
+    if (minutes < 10) {
+        minutes = `0${minutes}`
+    }
+    if (hours < 10) {
+        hours = `0${hours}`
+    }
+    outstring = `${hours}:${minutes}`
+    return outstring;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    button = document.getElementById(NOWBUTTON);
+    button.addEventListener("click", function(event) {
+        var output = document.getElementById("output");
+        while (output.hasChildNodes()) {
+            output.removeChild(output.firstChild);
+            // memory leak
+        }
+        chooser = document.getElementById("chooser");
+        if (!chooser) {
+            alert(chooser)
+        }
+        current = new Date(chooser.value);
+        before = new Date(current.valueOf() - 3000 * 60 * 30);
+        after = new Date(current.valueOf() + 3000 * 60 * 30);
+        var boundKeyRange = IDBKeyRange.bound(before, after);
+        mystore = mydb.transaction([SUNSTORE]).objectStore(SUNSTORE);
+        var index = mystore.index("date");
+        index.openCursor(boundKeyRange).onsuccess = (event)=>{
+            var cursor = event.target.result;
+            if (cursor) {
+                var stop = document.createElement("sun-element", {
+                    "is": "sun-element"
+                });
+                stop.setAttribute("allstuff", cursor.value);
+                stop.setAttribute("date", fmthours(cursor.value.date));
+                stop.setAttribute("sky", cursor.value.sky);
+                stop.setAttribute("azimuth", cursor.value.azimuth);
+                stop.setAttribute("elevation", cursor.value.elevation);
+                output.appendChild(stop);
+                cursor.continue()
+            }
+
+        }
+    });
+
+        document.getElementById(LOADBUTTON).addEventListener("click", function(event) {
+            event.target.disabled = true;
+            alert("load button");
+            getData("sun.txt");
+            event.target.disabled = false;
+        });
+        document.getElementById(DELETEBUTTON).addEventListener("click", function(event) {
+            alert("deleleload button");
+            window.indexedDB.deleteDatabase(DBNAME);
+        });
+//         document.getElementById("chooser").addEventListener("change", )
+
+    })
+
