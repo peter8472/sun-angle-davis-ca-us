@@ -8,17 +8,11 @@ const DBNAME = "blah1";
 const NOWBUTTON = "now";
 const DELETEBUTTON = "deleteall";
 const LOADBUTTON = "loadall";
-// request.onsuccess = function(event) {
-//     console.log(event.target.result);
-// }
-// request.onerror = function(event) {
-//     console.log("bad fail to open db");
-// }
+
 function mylog(message) {
     console.log(message)
 }
 
-// ==================paste
 function startUp() {
     var mydbreq = window.indexedDB.open(DBNAME, 1)
     mydbreq.onerror = function(event) {
@@ -27,14 +21,11 @@ function startUp() {
     mydbreq.onsuccess = function(event) {
         mylog("success opening dartabase");
         mydb = mydbreq.result;
-
-        //console.log(mydb);
     }
     mydbreq.onupgradeneeded = function(event) {
         mydb = event.target.result;
         mydb.onerror = function(event) {
             mylog("error loading database ")
-
         }
         mydb.onsuccess = function(event) {
             mylog("done upgrading database")
@@ -57,13 +48,10 @@ function startUp() {
             objectStore.createIndex("elevation", "elevation", {
                 unique: false
             });
-
         }
     }
-
 }
 
-// ===================
 function addPoints(pointList) {
     if (mydb) {
         var transaction = mydb.transaction([SUNSTORE], "readwrite");
@@ -150,11 +138,12 @@ var fmthours = function(when) {
     outstring = `${hours}:${minutes}`
     return outstring;
 }
+function nowbutton(event) {
 
-document.addEventListener("DOMContentLoaded", function() {
-    button = document.getElementById(NOWBUTTON);
-    button.addEventListener("click", function(event) {
+}
+function update(event) {
         var output = document.getElementById("output");
+        var timePoint = [];
         while (output.hasChildNodes()) {
             output.removeChild(output.firstChild);
             // memory leak
@@ -163,7 +152,19 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!chooser) {
             alert(chooser)
         }
+        
         current = new Date(chooser.value);
+        if (event.target.id == "now") {
+            // force time to now
+            var tmp = new Date();
+            var diff = tmp.getTimezoneOffset() * 60 * 1000;
+
+            current = new Date(tmp.valueOf() - diff);
+            
+            current.toISOString().slice(0,-1);
+            chooser.value = current.toISOString().slice(0,-1);
+
+        }
         before = new Date(current.valueOf() - 3000 * 60 * 30);
         after = new Date(current.valueOf() + 3000 * 60 * 30);
         var boundKeyRange = IDBKeyRange.bound(before, after);
@@ -172,20 +173,30 @@ document.addEventListener("DOMContentLoaded", function() {
         index.openCursor(boundKeyRange).onsuccess = (event)=>{
             var cursor = event.target.result;
             if (cursor) {
-                var stop = document.createElement("sun-element", {
+
+                timePoint.push(cursor.value);
+                cursor.continue()
+            }else {
+                
+                for (i = 0; i < timePoint.length-5; i++) {
+                    var stop = document.createElement("sun-element", {
                     "is": "sun-element"
                 });
-                stop.setAttribute("allstuff", cursor.value);
-                stop.setAttribute("date", fmthours(cursor.value.date));
-                stop.setAttribute("sky", cursor.value.sky);
-                stop.setAttribute("azimuth", cursor.value.azimuth);
-                stop.setAttribute("elevation", cursor.value.elevation);
+//                stop.setAttribute("allstuff", timePoint[i].value);
+                stop.setAttribute("date", fmthours(timePoint[i].date));
+                stop.setAttribute("sky", timePoint[i].sky);
+                stop.setAttribute("azimuth", timePoint[i].azimuth);
+                stop.setAttribute("elevation", timePoint[i].elevation);
                 output.appendChild(stop);
-                cursor.continue()
-            }
 
+                }
+            }
         }
-    });
+    }
+
+document.addEventListener("DOMContentLoaded", function() {
+    button = document.getElementById(NOWBUTTON);
+    button.addEventListener("click", update);
 
         document.getElementById(LOADBUTTON).addEventListener("click", function(event) {
             event.target.disabled = true;
@@ -197,7 +208,6 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("deleleload button");
             window.indexedDB.deleteDatabase(DBNAME);
         });
-//         document.getElementById("chooser").addEventListener("change", )
+        document.getElementById("chooser").addEventListener("change", update)
 
     })
-

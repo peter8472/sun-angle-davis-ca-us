@@ -42,7 +42,7 @@ class SunElement extends HTMLElement {
         shadow.appendChild(this.sky);
         shadow.appendChild(this.azimuth);
         shadow.appendChild(this.elevation);
-        console.log("shadow")
+        
 
     }
     makeCell(value) {
