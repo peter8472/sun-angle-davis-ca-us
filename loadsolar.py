@@ -25,11 +25,22 @@ class SunDatabase(object):
     def commit(self):
         self.conn.commit()
         
+    
+
     def getnow(self,ago_time=600,to_time=600):
         'return a range of records relative to the current time'
         now = datetime.datetime.today().timestamp()
         cur = self.conn.execute("""select * from solar where timestamp 
             between {} and {}""".format(now - ago_time, now + to_time))
+
+    def nearest(self,ago_time=7600,to_time=6700,when=None):
+        'return two closest records  to the current time'
+        'or given parameter "when"'
+        if when == None:
+
+            when = datetime.datetime.today().timestamp()
+        cur = self.conn.execute("""select * from solar where timestamp 
+            between {} and {} order by abs(timestamp - {}) limit 25""".format(when - ago_time, when + to_time, when))
 
         return(cur.fetchall())
     def twilight(self,ago_time=600,to_time=600):
@@ -39,15 +50,15 @@ class SunDatabase(object):
             between {} and {}""".format(now - ago_time, now + to_time))
 
         return(cur.fetchall())
-    def sunset(self):
+    def sunsets(self, ago_days = 5, to_days=5):
+        'get the sunset time for the previous and next days'
         now = datetime.datetime.today().timestamp()
         cur = self.conn.execute("""select * from solar where timestamp 
-            between {} and {} and elevation > -5""".format(now - 600, now + 12*60*60))
+            between {} and {} and sky like "%s%" """.format(now - ago_days*60*60*24, 
+                    now + to_days*60*60*24))
 
-        for i in cur.fetchall():
-            print(
-                datetime.datetime.fromtimestamp(i[0]),
-                i[1], i[2])
+        return  cur.fetchall()
+            
 
 def dump_to_file():
     'prints a tsv for all records'
@@ -124,9 +135,16 @@ def make_a_new_database():
 def interpolate(val1, val2, tstamp):
     'interpolate between two timestamps.'
     'calculate the offsets'
-    off1 = tstamp - val1['timestamp']
-    off2 = val2['timestamp'] - tstamp
-    percent = off1 / (val2['timestamp'] - val2['timestamp'])
+    fraction = (tstamp - val1[0])/(val2[0] - val1[0])
+    elevationX  =  fraction  * (val2[3] - val1[3]) + val1[3]
+    return elevationX
+
+    
+
+
+    
+    
+
 
 if __name__ == "__main__":
     # dump_to_file()
@@ -136,5 +154,6 @@ if __name__ == "__main__":
 
     for i in cur.fetchall():
         print(i)
+    db.nearest()
 
 

@@ -2,6 +2,7 @@ class SunElement extends HTMLElement {
 
     constructor() {
         super();
+        console.log("constructor for sunelelment called")
         var shadow = this.attachShadow({
             mode: "open"
         });
@@ -50,6 +51,9 @@ class SunElement extends HTMLElement {
         x.innerText = value;
         return x;
     }
+    static get observedAttributes() {
+        return ['date','sky','azimuth','elevation'];
+    }
     connectedCallback() {
         var name = this.getAttribute("date")
 
@@ -62,6 +66,15 @@ class SunElement extends HTMLElement {
         this.azimuth.innerText=azimuth;
         var elevation = this.getAttribute('elevation');
         this.elevation.innerText=elevation;
+    }
+    attributeChangedCallback(name, oldValue,newValue ) {
+        if (name == "date") {
+        
+            this.date.innerText = newValue
+        
+        } else if (name == "elevation") {
+            this.elevation.innerText = newValue;
+        }
     }
 }
 customElements.define("sun-element", SunElement);

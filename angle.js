@@ -138,9 +138,25 @@ var fmthours = function(when) {
     outstring = `${hours}:${minutes}`
     return outstring;
 }
-function nowbutton(event) {
-
+var hms = function(when) {
+    hours = when.getHours();
+    minutes = when.getMinutes();
+    if (minutes < 10) {
+        minutes = `0${minutes}`
+    }
+    if (hours < 10) {
+        hours = `0${hours}`
+    }
+    secs = when.getSeconds();
+    if (secs < 10) {
+        secs = `0${secs}`
+    }
+    outstring = `${hours}:${minutes}:${secs}`
+    return outstring;
 }
+
+
+
 function update(event) {
         var output = document.getElementById("output");
         var timePoint = [];
@@ -182,7 +198,7 @@ function update(event) {
                     var stop = document.createElement("sun-element", {
                     "is": "sun-element"
                 });
-//                stop.setAttribute("allstuff", timePoint[i].value);
+
                 stop.setAttribute("date", fmthours(timePoint[i].date));
                 stop.setAttribute("sky", timePoint[i].sky);
                 stop.setAttribute("azimuth", timePoint[i].azimuth);
@@ -198,16 +214,17 @@ document.addEventListener("DOMContentLoaded", function() {
     button = document.getElementById(NOWBUTTON);
     button.addEventListener("click", update);
 
-        document.getElementById(LOADBUTTON).addEventListener("click", function(event) {
-            event.target.disabled = true;
-            alert("load button");
-            getData("sun.txt");
-            event.target.disabled = false;
-        });
-        document.getElementById(DELETEBUTTON).addEventListener("click", function(event) {
-            alert("deleleload button");
-            window.indexedDB.deleteDatabase(DBNAME);
-        });
-        document.getElementById("chooser").addEventListener("change", update)
+    document.getElementById(LOADBUTTON).addEventListener("click", function(event) {
+        event.target.disabled = true;
+        alert("load button");
+        getData("sun.txt");
+        event.target.disabled = false;
+    });
+    document.getElementById(DELETEBUTTON).addEventListener("click", function(event) {
+        alert("deleleload button");
+        window.indexedDB.deleteDatabase(DBNAME);
+    });
+    document.getElementById("chooser").addEventListener("change", update)
+    document.getElementById("live").addEventListener("click", liveUpdate)
 
     })

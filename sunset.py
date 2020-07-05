@@ -24,8 +24,29 @@ For example, considering the inherent atmospheric instability at the horizon, on
     
 
                 
+def allsunsets():
+    m = loadsolar.SunDatabase()
+    cur = m.conn.execute("""select * from solar where sky 
+    
+    
+    like "%r%" 
+    order by elevation
+    """)
+    for i in cur.fetchall():
+ 
+    
+        print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
 if __name__ == "__main__":
     m = loadsolar.SunDatabase()
-    for i in m.twilight(ago_time=9033, to_time=12600):
-        print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
-    m.getnow()
+    now = datetime.datetime.today().timestamp()
+    results = m.nearest(ago_time=2352, to_time=398472, when=now)
+    for i in results[0:2]:
+ 
+    
+       print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
+    print (
+        datetime.datetime.fromtimestamp(now),
+        
+        
+        loadsolar.interpolate(results[0], results[1], now))
+    

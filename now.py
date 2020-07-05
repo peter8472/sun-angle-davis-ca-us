@@ -9,5 +9,5 @@ import loadsolar
                 
 if __name__ == "__main__":
     m = loadsolar.SunDatabase()
-    for i in m.getnow(ago_time=0, to_time=12600):
+    for i in m.getnow(ago_time=0, to_time=3600):
         print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
