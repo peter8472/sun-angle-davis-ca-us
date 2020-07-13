@@ -36,18 +36,26 @@ function liveUpdate(event) {
         portion = fraction * range;
         
         
-        elevationX  =  portion + val1;
+        elevationX  =  portion + val0;
         
 
             
  
             output.setAttribute("date", hms(now));
-            output.setAttribute("elevation", elevationX);
+            output.setAttribute("elevation", elevationX.toFixed(7));
             // output.setAttribute("sky", timePoint[i].sky);
             // output.setAttribute("azimuth", timePoint[i].azimuth);
             // output.setAttribute("elevation", timePoint[i].elevation);
+            requestAnimationFrame(liveUpdate);
 
 
         }
     }
 }
+// def interpolate(val1, val2, tstamp):
+//     'interpolate between two timestamps.'
+//     'calculate the offsets'
+//     fraction = (tstamp - val1[0])/(val2[0] - val1[0])
+//     elevationX  =  fraction  * (val2[3] - val1[3]) + val1[3]
+//     return elevationX
+

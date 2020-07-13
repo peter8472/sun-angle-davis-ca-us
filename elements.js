@@ -74,6 +74,8 @@ class SunElement extends HTMLElement {
         
         } else if (name == "elevation") {
             this.elevation.innerText = newValue;
+        } else if (name == "azimuth") {
+            this.azimuth.innerText = newValue;
         }
     }
 }

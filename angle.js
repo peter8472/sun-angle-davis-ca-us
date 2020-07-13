@@ -175,10 +175,11 @@ function update(event) {
             var tmp = new Date();
             var diff = tmp.getTimezoneOffset() * 60 * 1000;
 
-            current = new Date(tmp.valueOf() - diff);
+            isoAdjustHack = new Date(tmp.valueOf() - diff);
             
-            current.toISOString().slice(0,-1);
-            chooser.value = current.toISOString().slice(0,-1);
+            isoAdjustHack.toISOString().slice(0,-1);
+            chooser.value = isoAdjustHack.toISOString().slice(0,-1);
+            //console.log(`crrected ${current}`)
 
         }
         before = new Date(current.valueOf() - 3000 * 60 * 30);
@@ -225,6 +226,9 @@ document.addEventListener("DOMContentLoaded", function() {
         window.indexedDB.deleteDatabase(DBNAME);
     });
     document.getElementById("chooser").addEventListener("change", update)
-    document.getElementById("live").addEventListener("click", liveUpdate)
+    document.getElementById("live").addEventListener("click", function(event) {
+        liveUpdate();
+        
+    });
 
-    })
+});

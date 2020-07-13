@@ -9,5 +9,16 @@ import loadsolar
                 
 if __name__ == "__main__":
     m = loadsolar.SunDatabase()
-    for i in m.getnow(ago_time=0, to_time=3600):
-        print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
+    now = datetime.datetime.today().timestamp()
+    results = m.nearest(ago_time=2352, to_time=398472, when=now)
+    for i in results[0:2]:
+ 
+    
+       print(datetime.datetime.fromtimestamp(i[0]), i[1], i[3])
+    print (
+        datetime.datetime.fromtimestamp(now),
+        
+        
+        loadsolar.interpolate(results[0], results[1], now))
+    
+    

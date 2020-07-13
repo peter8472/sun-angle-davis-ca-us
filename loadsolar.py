@@ -32,6 +32,7 @@ class SunDatabase(object):
         now = datetime.datetime.today().timestamp()
         cur = self.conn.execute("""select * from solar where timestamp 
             between {} and {}""".format(now - ago_time, now + to_time))
+        return cur.fetchall()
 
     def nearest(self,ago_time=7600,to_time=6700,when=None):
         'return two closest records  to the current time'
@@ -141,19 +142,30 @@ def interpolate(val1, val2, tstamp):
 
     
 
-
-    
+def simpleInterpolate(val1, val2, fraction=.5):
+    elevationX  =  fraction  * (val2 - val1) + val1
+    return elevationX
     
 
 
 if __name__ == "__main__":
-    # dump_to_file()
-    db = SunDatabase()
-    cur = db.conn.execute("""select min(elevation),max(elevation) from solar where sky like "A%" 
-        limit 150""")
+    assert simpleInterpolate(0,100, fraction=.4) == 40
+    assert simpleInterpolate(100,0, fraction = .4) == 60
+    assert simpleInterpolate(-10,0) == -5
+    assert simpleInterpolate(-10,10) == 0
+    assert simpleInterpolate(-10,0) == -5
+    assert simpleInterpolate(-10,-20) == -15
+    assert simpleInterpolate(-30,-20) == -25
+    
 
-    for i in cur.fetchall():
-        print(i)
-    db.nearest()
+    
+
+    # db = SunDatabase()
+    # cur = db.conn.execute("""select min(elevation),max(elevation) from solar where sky like "A%" 
+    #     limit 150""")
+
+    # for i in cur.fetchall():
+    #     print(i)
+    # db.nearest()
 
 
