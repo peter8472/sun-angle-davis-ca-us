@@ -2,7 +2,7 @@ class SunElement extends HTMLElement {
 
     constructor() {
         super();
-        console.log("constructor for sunelelment called")
+//         console.log("constructor for sunelelment called")
         var shadow = this.attachShadow({
             mode: "open"
         });

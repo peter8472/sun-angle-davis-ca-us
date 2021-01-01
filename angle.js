@@ -182,8 +182,8 @@ function update(event) {
             //console.log(`crrected ${current}`)
 
         }
-        before = new Date(current.valueOf() - 3000 * 60 * 30);
-        after = new Date(current.valueOf() + 3000 * 60 * 30);
+        before = new Date(current.valueOf() - 8000 * 60 * 30);
+        after = new Date(current.valueOf() + 8000 * 60 * 30);
         var boundKeyRange = IDBKeyRange.bound(before, after);
         mystore = mydb.transaction([SUNSTORE]).objectStore(SUNSTORE);
         var index = mystore.index("date");
@@ -195,7 +195,7 @@ function update(event) {
                 cursor.continue()
             }else {
                 
-                for (i = 0; i < timePoint.length-5; i++) {
+                for (i = 0; i < timePoint.length-23; i++) {
                     var stop = document.createElement("sun-element", {
                     "is": "sun-element"
                 });
