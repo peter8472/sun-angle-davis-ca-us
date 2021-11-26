@@ -30,26 +30,26 @@
     
     </style>
 
-    <!-- Inline scripts are forbidden in Firefox OS apps (CSP restrictions),
-         so we use a script file. -->
+    
     <script src="app.js" defer></script>
-    <script src="angle.js"></script>
+    <script src="angle.js" defer></script>
     <script src="elements.js"></script>
     <script src="liveupdate.js"></script>
 
   </head>
 
   <body>
-    <!-- This code is in the public domain. Enjoy! -->
-    <h1>under constructionm</h1>
+    
+    <h1>sun angle 2020</h1>
     
     <data-tab id=output></data-tab>
-    <button id=now name=now value="this is a button">near now</button>
+    <button id=now name=now value="this is a button">the time back then</button>
     <input type="datetime-local" id=chooser value="2020-06-23T06:00" step=60 />
     <button id=deleteall >delete the database</button>
     <button id=loadall >load the database</button>
     <button id=live>make live update</button>
     <div ><sun-element class=fixed id=current></sun-element></div>
+    <div id="errors"></div>
 
         
   </body>

@@ -14,6 +14,7 @@ function mylog(message) {
 }
 
 function startUp() {
+    mylog("startup called")
     var mydbreq = window.indexedDB.open(DBNAME, 1)
     mydbreq.onerror = function(event) {
         mylog("error opening databsae")
@@ -32,6 +33,7 @@ function startUp() {
         }
         switch (event.oldVersion) {
         case 0:
+        
             objectStore = mydb.createObjectStore(SUNSTORE, {
                 autoIncrement: true
             });
@@ -74,6 +76,8 @@ function addPoints(pointList) {
             alert("add object failuer");
         }
         ;
+    } else {
+        console.log("no database")
     }
 }
 
@@ -154,49 +158,69 @@ var hms = function(when) {
     outstring = `${hours}:${minutes}:${secs}`
     return outstring;
 }
+function fixyear(realdate) {
+    /* This corrects the year to be between Nov 5, 2019, to Nov 4, 2020 */
+    year = realdate.getFullYear();
+    month = realdate.getMonth();
+    day = realdate.getDate();
+    hours = realdate.getHours();
+    minutes = realdate.getMinutes();
+    seconds = realdate.getSeconds();
+    millis = realdate.getMilliseconds();
+    if ((month > 9) && (day > 5)) {
+        year = 2019;
+        
+    } else {
+        year = 2020;
+    }
+    return new Date(year,month,day,hours,minutes,seconds,millis);
+
+
+}
 
 
 
 function update(event) {
-        var output = document.getElementById("output");
-        var timePoint = [];
-        while (output.hasChildNodes()) {
-            output.removeChild(output.firstChild);
-            // memory leak
-        }
-        chooser = document.getElementById("chooser");
-        if (!chooser) {
-            alert(chooser)
-        }
-        
-        current = new Date(chooser.value);
-        if (event.target.id == "now") {
-            // force time to now
-            var tmp = new Date();
-            var diff = tmp.getTimezoneOffset() * 60 * 1000;
+    var output = document.getElementById("output");
+    var timePoint = [];
+    while (output.hasChildNodes()) {
+        output.removeChild(output.firstChild);
+        // memory leak
+    }
+    chooser = document.getElementById("chooser");
+    if (!chooser) {
+        alert(chooser)
+    }
 
-            isoAdjustHack = new Date(tmp.valueOf() - diff);
-            
-            isoAdjustHack.toISOString().slice(0,-1);
-            chooser.value = isoAdjustHack.toISOString().slice(0,-1);
-            //console.log(`crrected ${current}`)
+    current = new Date(chooser.value);
+    if (event.target.id == "now") {
+        // force time to now
+        var pretmp = new Date();
+        var tmp = fixyear(pretmp);
+        var diff = tmp.getTimezoneOffset() * 60 * 1000;
 
-        }
-        before = new Date(current.valueOf() - 8000 * 60 * 30);
-        after = new Date(current.valueOf() + 8000 * 60 * 30);
-        var boundKeyRange = IDBKeyRange.bound(before, after);
-        mystore = mydb.transaction([SUNSTORE]).objectStore(SUNSTORE);
-        var index = mystore.index("date");
-        index.openCursor(boundKeyRange).onsuccess = (event)=>{
-            var cursor = event.target.result;
-            if (cursor) {
+        isoAdjustHack = new Date(tmp.valueOf() - diff);
 
-                timePoint.push(cursor.value);
-                cursor.continue()
-            }else {
-                
-                for (i = 0; i < timePoint.length-23; i++) {
-                    var stop = document.createElement("sun-element", {
+        isoAdjustHack.toISOString().slice(0, -1);
+        chooser.value = isoAdjustHack.toISOString().slice(0, -1);
+        //console.log(`crrected ${current}`)
+
+    }
+    before = new Date(current.valueOf() - 8000 * 60 * 30);
+    after = new Date(current.valueOf() + 8000 * 60 * 30);
+    var boundKeyRange = IDBKeyRange.bound(before, after);
+    mystore = mydb.transaction([SUNSTORE]).objectStore(SUNSTORE);
+    var index = mystore.index("date");
+    index.openCursor(boundKeyRange).onsuccess = (event) => {
+        var cursor = event.target.result;
+        if (cursor) {
+
+            timePoint.push(cursor.value);
+            cursor.continue()
+        } else {
+
+            for (i = 0; i < timePoint.length - 23; i++) {
+                var stop = document.createElement("sun-element", {
                     "is": "sun-element"
                 });
 
@@ -206,10 +230,10 @@ function update(event) {
                 stop.setAttribute("elevation", timePoint[i].elevation);
                 output.appendChild(stop);
 
-                }
             }
         }
     }
+}
 
 document.addEventListener("DOMContentLoaded", function() {
     button = document.getElementById(NOWBUTTON);
