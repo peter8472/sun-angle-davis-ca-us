@@ -1,4 +1,6 @@
 __pycache__/
 # what was this, tetris?  Or....
 allhigh.json
+# private
+config.py
 .vscode/
